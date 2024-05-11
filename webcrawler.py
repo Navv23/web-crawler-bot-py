@@ -1,55 +1,34 @@
-import logging
+from bs4 import BeautifulSoup
 import requests
 import time
 import random
-import os
 
 from seleniumdriver import SeleniumDriver
 from requestmanager import RequestManager
-from bs4 import BeautifulSoup
+from logger import configure_logger
 
 request_manager = RequestManager()
 
-class WebCrawler(SeleniumDriver):
-    def __init__(self, client, webdriver_path=None, use_session=False, min_delay=1, max_delay=3):
+class WebCrawler():
+    def __init__(self, client, min_delay=1, max_delay=3):
         self.client = client
-        self.webdriver_path = webdriver_path
-        self.use_session = use_session
         self.min_delay = min_delay
         self.max_delay = max_delay
         self.requests_count = 4 
 
-        self.logger = self.__configure_logger()
+        self.logger = configure_logger()
         
-        if self.use_session:
-            self.__create_session()
-        else:
-            self.session = None
-
         if self.client == 'selenium':
             self.driver = SeleniumDriver(headless_mode=False).get_driver()
-        
-    def __configure_logger(self):
-        logger = logging.getLogger(__name__)
-        logger.setLevel(logging.INFO)
-        formatter = logging.Formatter('%(asctime)s - %(levelname)s - %(message)s')
 
-        project_dir = os.path.dirname(os.path.abspath(__file__))
-        logs_dir = os.path.join(project_dir, 'logs')
-        os.makedirs(logs_dir, exist_ok=True)
-        log_file = os.path.join(logs_dir, 'scraping.log')
-        fh = logging.FileHandler(log_file)
-        fh.setFormatter(formatter)
-        logger.addHandler(fh)
-
-        return logger
-    
-    def scrape(self, url):
+    def scrape(self, url, driver=None, use_session=False):
         try:
+            if driver is None:
+                driver = self.driver
             if self.client == 'requests':
-                content = self.__scrape_with_requests(url)
+                content = self.__scrape_with_requests(url, use_session)
             elif self.client == 'selenium':
-                content = self.__scrape_with_selenium(url)
+                content = self.__scrape_with_selenium(url, driver=driver)
             else:
                 raise ValueError("Unsupported scraping client")
             
@@ -59,8 +38,8 @@ class WebCrawler(SeleniumDriver):
             self.logger.error(f"Error occurred while scraping: {e}")
             raise
 
-    def __scrape_with_requests(self, url):
-        session_used = "Using session" if self.use_session else "Not using session"
+    def __scrape_with_requests(self, url, use_session=False):
+        session_used = "Using session" if use_session else "Not using session"
     
         try:
             delay = random.uniform(self.min_delay, self.max_delay)
@@ -75,8 +54,8 @@ class WebCrawler(SeleniumDriver):
             user_agent = request_manager.rotate_user_agent()
             headers = {'User-Agent': user_agent}
             
-            if self.use_session:
-                session = self.session
+            if use_session:
+                session = request_manager.get_session()
                 response = session.get(url, headers=headers)
             else:
                 response = requests.get(url, headers=headers)
@@ -98,20 +77,17 @@ class WebCrawler(SeleniumDriver):
             self.logger.error(f"Error occurred during request: {e}")
             raise
 
-
-    def __scrape_with_selenium(self, url):
+    def __scrape_with_selenium(self, url, driver):
         try:
             delay = random.uniform(self.min_delay, self.max_delay)
             time.sleep(delay)
             
-            self.driver.get(url)
+            driver.get(url)
 
             page = BeautifulSoup(self.driver.page_source, 'html.parser')
-
             self.logger.info(f"Selenium: Successful request for the URL: {url}")
             return page
 
         except Exception as e:
             self.logger.error(f"Error occurred while scraping with Selenium: {e}")
             raise
-
