@@ -12,7 +12,7 @@ print(scraped_content)
 #WITH SELENIUM
 crawler = WebCrawler(client='selenium')
 url = 'url'
-scraped_content = crawler.scrape(url, driver='your webdriver here')
+scraped_content = crawler.scrape(url)
 driver = crawler.driver #THE DRIVER OBJECT INITIALIZED FROM SeleniumDriver CLASS
 
 ### --- AN EXAMPLE ON HOW IT CAN BE USED WITH SELENIUM--- ###

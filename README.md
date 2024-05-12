@@ -27,7 +27,7 @@ The WebCrawler class is designed for scraping web content using either the reque
 
 - Install requirements.txt file: **pip install -r requirements.txt**
 
-- Install chrome or any chromium browser, download its webdriver for linux and 64 bit according to your browser version, you can find reference here: https://googlechromelabs.github.io/chrome-for-testing/#stable
+- Make sure you have installed chrome or any chromium browser
 
 ------------------------------------------------------------------------------------------------------------------------------
 ### Step 4

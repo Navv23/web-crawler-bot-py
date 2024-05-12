@@ -1,14 +1,11 @@
 from selenium import webdriver
 from selenium.webdriver.chrome.options import Options
-from selenium.webdriver.common.by import By
-from selenium.webdriver.support.ui import WebDriverWait
-from selenium.webdriver.support import expected_conditions as EC
+from chromedriver_binary import chromedriver_filename
 
 class SeleniumDriver:
-    def __init__(self, headless_mode=True, user_agent=None, webdriver_path=None):
+    def __init__(self, headless_mode=True, user_agent=None):
         self.headless_mode = headless_mode
         self.user_agent = user_agent
-        self.webdriver_path = webdriver_path
         self.driver = None
 
     def get_driver(self):
@@ -19,11 +16,7 @@ class SeleniumDriver:
             if self.user_agent:
                 options.add_argument(f"user-agent={self.user_agent}")
 
-            if self.webdriver_path:
-                self.driver = webdriver.Chrome(executable_path=self.webdriver_path, options=options)
-            else:
-                self.driver = webdriver.Chrome(options=options)
-
+            self.driver = webdriver.Chrome(options=options)
             return self.driver
         except Exception as e:
             print(f"Error initializing WebDriver: {e}")

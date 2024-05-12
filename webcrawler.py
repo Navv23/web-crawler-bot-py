@@ -21,14 +21,12 @@ class WebCrawler():
         if self.client == 'selenium':
             self.driver = SeleniumDriver(headless_mode=False).get_driver()
 
-    def scrape(self, url, driver=None, use_session=False):
+    def scrape(self, url, use_session=False):
         try:
-            if driver is None:
-                driver = self.driver
             if self.client == 'requests':
                 content = self.__scrape_with_requests(url, use_session)
             elif self.client == 'selenium':
-                content = self.__scrape_with_selenium(url, driver=driver)
+                content = self.__scrape_with_selenium(url)
             else:
                 raise ValueError("Unsupported scraping client")
             
@@ -77,12 +75,12 @@ class WebCrawler():
             self.logger.error(f"Error occurred during request: {e}")
             raise
 
-    def __scrape_with_selenium(self, url, driver):
+    def __scrape_with_selenium(self, url):
         try:
             delay = random.uniform(self.min_delay, self.max_delay)
             time.sleep(delay)
             
-            driver.get(url)
+            self.driver.get(url)
 
             page = BeautifulSoup(self.driver.page_source, 'html.parser')
             self.logger.info(f"Selenium: Successful request for the URL: {url}")
