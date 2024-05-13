@@ -61,16 +61,16 @@ class WebCrawler():
             if response and response.status_code == 200:
                 self.logger.info(f"{session_used} - Successful request, Request made to {url}, Response code: {response.status_code}")
                 if isinstance(response.text, str):
-                    return response.text
+                    return {'status_code':response.status_code, 'content':response.text}
                 else:
                     error_message = f"Invalid Response: Response for the URL {url} is not a string"
                     self.logger.error(error_message)
-                    return error_message
+                    return {'status_code': response.status_code, 'content': error_message}
             else:
                 if response:
                     self.logger.warning(f"{session_used} - For the {url}, request was not successful. Response code: {response.status_code}")
-                else:
-                    self.logger.warning(f"{session_used} - For the {url}, request was not successful. No response received.")
+                    return {'status_code': None, 'content': None}
+                
         except requests.RequestException as e:
             self.logger.error(f"Error occurred during request: {e}")
             raise
@@ -84,10 +84,8 @@ class WebCrawler():
 
             page = BeautifulSoup(self.driver.page_source, 'html.parser')
             self.logger.info(f"Selenium: Successful request for the URL: {url}")
-            return page
+            return {'status_code': 200, 'content': page}
 
         except Exception as e:
             self.logger.error(f"Error occurred while scraping with Selenium: {e}")
-            raise
-    
-    
+            return {'status_code': None, 'content': None}
