@@ -1,5 +1,5 @@
 # Import the WebCrawler class from your module
-from webcrawler import WebCrawler
+from WebCrawler.webcrawler import WebCrawler
 from selenium.webdriver.common.by import By
 
 #WITH REQUESTS

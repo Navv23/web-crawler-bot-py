@@ -3,9 +3,9 @@ import requests
 import time
 import random
 
-from seleniumdriver import SeleniumDriver
-from requestmanager import RequestManager
-from logger import configure_logger
+from RequestManager.seleniumdriver import SeleniumDriver
+from RequestManager.requestmanager import RequestManager
+from Logging.logger import configure_logger
 
 request_manager = RequestManager()
 
@@ -89,3 +89,5 @@ class WebCrawler():
         except Exception as e:
             self.logger.error(f"Error occurred while scraping with Selenium: {e}")
             raise
+    
+    
