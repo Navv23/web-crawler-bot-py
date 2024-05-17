@@ -2,15 +2,15 @@
 from WebCrawler.webcrawler import WebCrawler
 from selenium.webdriver.common.by import By
 
-#WITH REQUESTS
-crawler = WebCrawler(client='requests')
+#---- WITH REQUESTS
+crawler = WebCrawler(client='requests', timeout=10) #SET TIMEOUT BASED ON YOUR PAGE WAITIME PREFERENCE
 url = 'url'
 scraped_content = crawler.scrape(url, use_session=False) #Change use_session to True if needed
 print(scraped_content)
 
 
-#WITH SELENIUM
-crawler = WebCrawler(client='selenium')
+#---- WITH SELENIUM
+crawler = WebCrawler(client='selenium', headless_mode=False, timeout=10) 
 url = 'url'
 scraped_content = crawler.scrape(url)
 driver = crawler.driver #THE DRIVER OBJECT INITIALIZED FROM SeleniumDriver CLASS

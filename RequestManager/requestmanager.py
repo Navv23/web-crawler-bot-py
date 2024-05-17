@@ -1,25 +1,30 @@
-import random
+from fake_useragent import UserAgent
+import requests
+
+browsers =['edge', 'chrome']
+platforms = ['pc']
 
 class RequestManager:
     def __init__(self):
-        self.user_agents = [
-            "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/88.0.4324.182 Safari/537.36",
-            "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/89.0.4389.90 Safari/537.36",
-            "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/90.0.4430.93 Safari/537.36",
-            "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/91.0.4472.124 Safari/537.36",
-            "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/92.0.4515.107 Safari/537.36",
-            "Mozilla/5.0 (Windows NT 11.0; Win64; x64; rv:95.0) Gecko/20100101 Firefox/95.0",
-            "Mozilla/5.0 (Windows NT 11.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/95.0.4638.54 Safari/537.36",
-            "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/95.0.4638.54 YaBrowser/21.11.2.605 Yowser/2.5 Safari/537.36",
-        ]
-
-        self.cookies = [
-            {"cookie_name_1": "cookie_value_1"},
-        ]
-        
+        self.ua = UserAgent(browsers=browsers, platforms=platforms)
 
     def rotate_user_agent(self):
-        return random.choice(self.user_agents)
+        return self.ua.random
+
+    def get_headers(self):
+        headers = {
+            'User-Agent': self.rotate_user_agent(),
+            'Accept-Encoding': 'gzip, deflate, br',
+            'Accept-Language': 'en-US,en;q=0.9',
+            'Referer': '',
+            'Connection': 'keep-alive',
+            'Cache-Control': 'no-cache',
+            'Upgrade-Insecure-Requests': '1',
+        }
+        return headers
     
-    def get_cookie(self):
-        return random.choice(self.user_agents)
+    def get_session(self):
+        headers = self.get_headers()
+        session = requests.Session()
+        session.headers.update(headers)
+        return session

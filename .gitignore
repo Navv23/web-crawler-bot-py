@@ -1,0 +1,20 @@
+# Ignore logs
+logs/
+
+# Ignore virtual environment
+env/
+
+# Ignore Python bytecode files
+__pycache__/
+*.pyc
+*.pyo
+
+
+# Ignore gitignore directory
+
+test.py
+
+Research-Assistant.py
+
+scrapping_codes
+

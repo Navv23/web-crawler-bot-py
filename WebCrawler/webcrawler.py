@@ -6,20 +6,29 @@ import random
 from RequestManager.seleniumdriver import SeleniumDriver
 from RequestManager.requestmanager import RequestManager
 from Logging.logger import configure_logger
+from selenium.common.exceptions import TimeoutException, NoSuchElementException
+from selenium.webdriver.support.ui import WebDriverWait
+from selenium.webdriver.support import expected_conditions as EC
+from selenium.webdriver.common.by import By
 
 request_manager = RequestManager()
 
 class WebCrawler():
-    def __init__(self, client, min_delay=1, max_delay=3):
+    def __init__(self, client, min_delay=1, max_delay=3, timeout=10, headless_mode=True):
         self.client = client
         self.min_delay = min_delay
         self.max_delay = max_delay
-        self.requests_count = 4 
-
+        self.timeout = timeout
+        self.requests_count = 4
+        self.headless_mode = headless_mode
         self.logger = configure_logger()
         
         if self.client == 'selenium':
-            self.driver = SeleniumDriver(headless_mode=False).get_driver()
+            try:
+                self.driver = SeleniumDriver(headless_mode=self.headless_mode).get_driver()
+            except Exception as e:
+                self.logger.error(f"Error initializing WebDriver: {e}")
+                raise
 
     def scrape(self, url, use_session=False):
         try:
@@ -49,14 +58,13 @@ class WebCrawler():
                 self.logger.info(f"Pausing for additional {extra_delay} seconds for politeness")
                 time.sleep(extra_delay)
 
-            user_agent = request_manager.rotate_user_agent()
-            headers = {'User-Agent': user_agent}
+            headers = request_manager.get_headers()
             
             if use_session:
                 session = request_manager.get_session()
-                response = session.get(url, headers=headers)
+                response = session.get(url, headers=headers, timeout=self.timeout)
             else:
-                response = requests.get(url, headers=headers)
+                response = requests.get(url, headers=headers, timeout=self.timeout)
             
             if response and response.status_code == 200:
                 self.logger.info(f"{session_used} - Successful request, Request made to {url}, Response code: {response.status_code}")
@@ -80,11 +88,23 @@ class WebCrawler():
             delay = random.uniform(self.min_delay, self.max_delay)
             time.sleep(delay)
             
+            self.driver.set_page_load_timeout(self.timeout)
             self.driver.get(url)
 
-            page = BeautifulSoup(self.driver.page_source, 'html.parser')
+            if "404 - Not Found" in self.driver.title:
+                raise ValueError("404 - Not Found")
+
+            page = WebDriverWait(self.driver, self.timeout).until(EC.presence_of_element_located((By.TAG_NAME, "html")))
             self.logger.info(f"Selenium: Successful request for the URL: {url}")
-            return {'status_code': 200, 'content': page}
+            return {'status_code': 200, 'content': BeautifulSoup(self.driver.page_source, 'html.parser')}
+
+        except TimeoutException as e:
+            self.logger.error(f"Timeout occurred while loading the page: {url}")
+            return {'status_code': None, 'content': None}
+
+        except NoSuchElementException as e:
+            self.logger.error(f"Element not found while scraping: {e}")
+            return {'status_code': None, 'content': None}
 
         except Exception as e:
             self.logger.error(f"Error occurred while scraping with Selenium: {e}")
