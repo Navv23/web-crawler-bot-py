@@ -1,6 +1,6 @@
 # WebCrawler
 ## Description
-The WebCrawler class is designed for scraping web content using either the requests library or Selenium WebDriver, with abstracted features such as randomizing request, header rotation, session management (requests), politness delay, logging. 
+The WebCrawler class is designed for scraping web content using either the requests library or Selenium WebDriver, with abstracted features such as randomizing request, header rotation, session management (requests), politness delay, and logging. 
 ## Setup
 ### Step 1
 - Configure WSL on windows system, follow tutorial here: 

@@ -6,7 +6,7 @@ class Common():
         self.crawler = WebCrawler(client='requests')
 
     def download_file(self, url, download_path):
-        try:
+        try: 
             response = self.crawler.scrape(url)
             status_code = response.get('status_code')
             content = response.get('content')
@@ -21,7 +21,7 @@ class Common():
                 file_path = os.path.join(download_path, file_name)
                 
                 with open(file_path, 'wb') as f:
-                    f.write(content)
+                    f.write(content.encode('utf-8'))  # Encode content to bytes
                 print(f"File downloaded successfully: {file_path}")
                 return file_path
             else:

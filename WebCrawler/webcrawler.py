@@ -94,18 +94,23 @@ class WebCrawler():
             if "404 - Not Found" in self.driver.title:
                 raise ValueError("404 - Not Found")
 
-            page = WebDriverWait(self.driver, self.timeout).until(EC.presence_of_element_located((By.TAG_NAME, "html")))
+            page = WebDriverWait(self.driver, self.timeout).until(
+                EC.presence_of_element_located((By.TAG_NAME, "html"))
+            )
+            if not page:
+                raise ValueError("No page content found")
+
             self.logger.info(f"Selenium: Successful request for the URL: {url}")
             return {'status_code': 200, 'content': BeautifulSoup(self.driver.page_source, 'html.parser')}
 
-        except TimeoutException as e:
+        except TimeoutException:
             self.logger.error(f"Timeout occurred while loading the page: {url}")
-            return {'status_code': None, 'content': None}
+            return {'status_code': 408, 'content': None}
 
         except NoSuchElementException as e:
             self.logger.error(f"Element not found while scraping: {e}")
-            return {'status_code': None, 'content': None}
+            return {'status_code': 404, 'content': None}
 
         except Exception as e:
-            self.logger.error(f"Error occurred while scraping with Selenium: {e}")
-            return {'status_code': None, 'content': None}
+            self.logger.error(f"Unexpected error occurred while scraping with Selenium: {e}")
+            return {'status_code': 500, 'content': None}
