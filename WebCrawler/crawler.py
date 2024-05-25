@@ -13,13 +13,12 @@ from selenium.webdriver.common.by import By
 
 request_manager = RequestManager()
 
-class WebCrawler():
-    def __init__(self, client, min_delay=1, max_delay=3, timeout=10, headless_mode=True):
+class WebCrawler:
+    def __init__(self, client: str, min_delay: float = 1, max_delay: float = 3, timeout: int = 10, headless_mode: bool = True):
         self.client = client
         self.min_delay = min_delay
         self.max_delay = max_delay
         self.timeout = timeout
-        self.requests_count = 4
         self.headless_mode = headless_mode
         self.logger = configure_logger()
         
@@ -30,34 +29,36 @@ class WebCrawler():
                 self.logger.error(f"Error initializing WebDriver: {e}")
                 raise
 
-    def scrape(self, url, use_session=False):
+    def scrape(self, url: str, use_session: bool = False):
         try:
             if self.client == 'requests':
-                content = self.__scrape_with_requests(url, use_session)
+                content = self._scrape_with_requests(url, use_session)
             elif self.client == 'selenium':
-                content = self.__scrape_with_selenium(url)
+                content = self._scrape_with_selenium(url)
             else:
                 raise ValueError("Unsupported scraping client")
             
-            self.logger.info(f"Scraping completed")
+            self.logger.info("Scraping completed")
             return content
         except Exception as e:
             self.logger.error(f"Error occurred while scraping: {e}")
             raise
-
-    def __scrape_with_requests(self, url, use_session=False):
-        session_used = "Using session" if use_session else "Not using session"
     
+    
+    def _apply_delay(self):
+        delay = random.uniform(self.min_delay, self.max_delay)
+        time.sleep(delay)
+        self.requests_count += 1
+
+        if self.requests_count > 1 and self.requests_count % 4 == 0:
+            extra_delay = random.uniform(1, 4)
+            self.logger.info(f"Pausing for additional {extra_delay} seconds for politeness")
+            time.sleep(extra_delay)
+
+
+    def _scrape_with_requests(self, url: str, use_session: bool = False):
         try:
-            delay = random.uniform(self.min_delay, self.max_delay)
-            time.sleep(delay)
-            self.requests_count += 1
-
-            if self.requests_count > 1 and self.requests_count % 4 == 0:
-                extra_delay = random.uniform(1, 4)
-                self.logger.info(f"Pausing for additional {extra_delay} seconds for politeness")
-                time.sleep(extra_delay)
-
+            self._apply_delay()
             headers = request_manager.get_headers()
             
             if use_session:
@@ -66,28 +67,20 @@ class WebCrawler():
             else:
                 response = requests.get(url, headers=headers, timeout=self.timeout)
             
-            if response and response.status_code == 200:
-                self.logger.info(f"{session_used} - Successful request, Request made to {url}, Response code: {response.status_code}")
-                if isinstance(response.text, str):
-                    return {'status_code':response.status_code, 'content':response.text}
-                else:
-                    error_message = f"Invalid Response: Response for the URL {url} is not a string"
-                    self.logger.error(error_message)
-                    return {'status_code': response.status_code, 'content': error_message}
+            if response.status_code == 200:
+                self.logger.info(f"Successful request to {url}, Response code: {response.status_code}")
+                return {'status_code': response.status_code, 'content': response.text}
             else:
-                if response:
-                    self.logger.warning(f"{session_used} - For the {url}, request was not successful. Response code: {response.status_code}")
-                    return {'status_code': None, 'content': None}
+                self.logger.warning(f"Request to {url} was not successful. Response code: {response.status_code}")
+                return {'status_code': response.status_code, 'content': None}
                 
         except requests.RequestException as e:
             self.logger.error(f"Error occurred during request: {e}")
             raise
 
-    def __scrape_with_selenium(self, url):
+    def _scrape_with_selenium(self, url: str):
         try:
-            delay = random.uniform(self.min_delay, self.max_delay)
-            time.sleep(delay)
-            
+            self._apply_delay()
             self.driver.set_page_load_timeout(self.timeout)
             self.driver.get(url)
 
@@ -114,3 +107,5 @@ class WebCrawler():
         except Exception as e:
             self.logger.error(f"Unexpected error occurred while scraping with Selenium: {e}")
             return {'status_code': 500, 'content': None}
+
+    
