@@ -3,6 +3,7 @@ import requests
 import time
 import random
 
+from Configs.settings import MIN_DELAY, MAX_DELAY, DEFAULT_TIMEOUT, REQUEST_COUNT
 from RequestManager.seleniumdriver import SeleniumDriver
 from RequestManager.requestmanager import RequestManager
 from Logging.logger import configure_logger
@@ -14,14 +15,21 @@ from selenium.webdriver.common.by import By
 request_manager = RequestManager()
 
 class WebCrawler:
-    def __init__(self, client: str, min_delay: float = 1, max_delay: float = 3, timeout: int = 10, headless_mode: bool = True):
+    def __init__(self, 
+                 client: str, 
+                 min_delay: float = MIN_DELAY, 
+                 max_delay: float = MAX_DELAY, 
+                 timeout: int = DEFAULT_TIMEOUT, 
+                 headless_mode: bool = True,
+                 use_logging: bool = True):
         self.client = client
         self.min_delay = min_delay
         self.max_delay = max_delay
         self.timeout = timeout
         self.headless_mode = headless_mode
-        self.logger = configure_logger()
-        
+        self.logger = configure_logger() if use_logging else None
+        self.requests_count = REQUEST_COUNT
+
         if self.client == 'selenium':
             try:
                 self.driver = SeleniumDriver(headless_mode=self.headless_mode).get_driver()
@@ -43,8 +51,7 @@ class WebCrawler:
         except Exception as e:
             self.logger.error(f"Error occurred while scraping: {e}")
             raise
-    
-    
+
     def _apply_delay(self):
         delay = random.uniform(self.min_delay, self.max_delay)
         time.sleep(delay)
@@ -54,7 +61,6 @@ class WebCrawler:
             extra_delay = random.uniform(1, 4)
             self.logger.info(f"Pausing for additional {extra_delay} seconds for politeness")
             time.sleep(extra_delay)
-
 
     def _scrape_with_requests(self, url: str, use_session: bool = False):
         try:
@@ -94,6 +100,7 @@ class WebCrawler:
                 raise ValueError("No page content found")
 
             self.logger.info(f"Selenium: Successful request for the URL: {url}")
+
             return {'status_code': 200, 'content': BeautifulSoup(self.driver.page_source, 'html.parser')}
 
         except TimeoutException:

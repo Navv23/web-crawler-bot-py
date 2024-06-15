@@ -1,5 +1,5 @@
 import os
-from Crawlers.webcrawler import WebCrawler
+from .crawler import WebCrawler
 
 class Common():
     def __init__(self):

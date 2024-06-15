@@ -24,9 +24,6 @@ The WebCrawler class is designed for scraping web content using either the reque
 - Create a virtual environment by running the command: **python -m venv yourenvironmentname**
 - Activate your environment by: **source yourenvironmentname/bin/activate**
 
-
-- Install requirements.txt file: **pip install -r requirements.txt**
-
 - Make sure you have installed chrome or any chromium browser
 
 ------------------------------------------------------------------------------------------------------------------------------
@@ -34,3 +31,11 @@ The WebCrawler class is designed for scraping web content using either the reque
 - Refer example_request.py to have a look on how to make request using requests or selenium.
 
 ------------------------------------------------------------------------------------------------------------------------------
+
+### Step 4
+- To install the package locally, Navigate to the folder where setup.py is located and run:
+
+pip install .
+
+To force reinstall:
+pip install . --force-reinstall
