@@ -1,6 +1,6 @@
 import os
 from Crawlers.webcrawler import WebCrawler
-``
+
 class Common():
     def __init__(self):
         self.crawler = WebCrawler(client='requests')
