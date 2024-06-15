@@ -1,6 +1,5 @@
 from selenium import webdriver
 from selenium.webdriver.chrome.options import Options
-from chromedriver_binary import chromedriver_filename
 
 class SeleniumDriver:
     def __init__(self, headless_mode=True, user_agent=None):
